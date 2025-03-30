@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artist Management System - Register</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>Artist Management System</h1>
+        </div>
+        
+        <h2>Register New Admin</h2>
+        
+        <div class="alert alert-danger" id="error-alert" style="display: none;"></div>
+        
+        <form id="register-form">
+            <div class="form-group">
+                <label for="first_name">First Name</label>
+                <input type="text" class="form-control" id="first_name" name="first_name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="last_name">Last Name</label>
+                <input type="text" class="form-control" id="last_name" name="last_name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+                <small class="form-text">
+                    Password must be at least 8 characters long with at least one uppercase letter, one number and one special character.
+                </small>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="role">User Role</label>
+                <select class="role-select" id="role" name="role" required>
+                    <option value="">Select Role</option>
+                    <option value="super_admin">Super Admin</option>
+                    <option value="artist_manager">Artist Manager</option>
+                    <option value="artist">Artist</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn">Register</button>
+        </form>
+        
+        <div class="login-link">
+            <p>Already have an account? <a href="/login.html">Login</a></p>
+        </div>
+    </div>
+
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script>
+        // Form validation
+        const registerForm = document.getElementById('register-form');
+        const errorAlert = document.getElementById('error-alert');
+        
+        // Check if user is already logged in on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/check-auth')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.authenticated) {
+                        window.location.href = '/dashboard.html';
+                    }
+                })
+                .catch(error => console.error('Error checking authentication:', error));
+        });
+        
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const first_name = document.getElementById('first_name').value;
+            const last_name = document.getElementById('last_name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirm_password = document.getElementById('confirm_password').value;
+            const role = document.getElementById('role').value;
+            
+            // Basic validation
+            if (!first_name || !last_name || !email || !password || !role) {
+                errorAlert.textContent = 'All fields are required.';
+                errorAlert.style.display = 'block';
+                return;
+            }
+            
+            // Password validation
+            const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            
+            if (!passwordRegex.test(password)) {
+                errorAlert.textContent = 'Password must be at least 8 characters long with at least one uppercase letter, one number and one special character.';
+                errorAlert.style.display = 'block';
+                return;
+            }
+            
+            // Check if passwords match
+            if (password !== confirm_password) {
+                errorAlert.textContent = 'Passwords do not match.';
+                errorAlert.style.display = 'block';
+                return;
+            }
+            
+            // If validation passes, submit the form
+            fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    first_name,
+                    last_name,
+                    email,
+                    password,
+                    role
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/login.html';
+                } else {
+                    errorAlert.textContent = data.message || 'Registration failed. Please try again.';
+                    errorAlert.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error during registration:', error);
+                errorAlert.textContent = 'An error occurred. Please try again later.';
+                errorAlert.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>

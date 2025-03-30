@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artist Management System - Login</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #333;
+            font-size: 24px;
+        }
+        
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #4d79ff;
+            outline: none;
+        }
+        
+        .btn {
+            background-color: #4d79ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #3a66ff;
+        }
+        
+        .alert {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            color: #721c24;
+            display: none;
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        
+        .register-link a {
+            color: #4d79ff;
+            text-decoration: none;
+        }
+        
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>Artist Management System</h1>
+        </div>
+        
+        <h2>Admin Login</h2>
+        
+        <div class="alert" id="error-alert">
+            Invalid email or password. Please try again.
+        </div>
+        
+        <!-- Change the form to prevent default submission and use JavaScript instead -->
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="btn">Login</button>
+        </form>
+        
+        <div class="register-link">
+            <p>Don't have an account? <a href="/register.html">Register now</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is already logged in
+        function checkLoginStatus() {
+            // Use the API endpoint to check authentication
+            fetch('/api/check-auth', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.authenticated) {
+                    window.location.href = '/'; // Redirect to dashboard
+                }
+            })
+            .catch(error => {
+                console.error('Auth check error:', error);
+            });
+        }
+        
+        // Handle login form submission
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Send login request to the API endpoint
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Login successful, redirect to dashboard
+                    window.location.href = '/';
+                } else {
+                    // Show error message
+                    document.getElementById('error-alert').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Login error:', error);
+                document.getElementById('error-alert').style.display = 'block';
+            });
+        });
+        
+        // Run on page load
+        checkLoginStatus();
+    </script>
+</body>
+</html>
